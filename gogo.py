@@ -23,6 +23,7 @@ import os
 import errno
 import gettext
 import locale
+from subprocess import call
 
 t = gettext.translation(
     domain='gogo',
@@ -34,10 +35,11 @@ HELP_MSG = _(
 """gogo - bookmark your favorite directories
 
 usage:
-  gogo [OPTION]|[DIR_ALIAS]
+  gogo [OPTIONS]|[DIR_ALIAS]
 
 options:
   -l, --ls  : list aliases
+  -e --edit : open configuration file in $EDITOR
   -h --help : show this message
 
 See ~/.config/gogo/gogo.conf for configuration details."""
@@ -88,6 +90,16 @@ def createNonExistingConfigDir(configDir):
         if exc.errno == errno.EEXIST and os.path.isdir(configDir):
             pass
         else: raise
+
+def openConfigInEditor(configDir, configName):
+    configPath = os.path.join(configDir, configName)
+    try:
+        editor = os.environ["EDITOR"]
+    except KeyError:
+        sys.stderr.write(_("No $EDITOR set. Trying vi.\n"))
+        editor = "vi"
+    call([editor, configPath])
+    sys.exit(1)
 
 def readConfig(configDir, configName):
     createNonExistingConfigDir(configDir)
@@ -142,6 +154,8 @@ def main():
             fatalError(HELP_MSG)
         elif arg == "-l" or arg == "--ls":
             printConfig(config)
+        elif arg == "-e" or arg == "--edit":
+            openConfigInEditor(configDir, configName)
         else:
             newdir = config.get(arg)
             if newdir is None:
