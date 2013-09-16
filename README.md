@@ -31,6 +31,19 @@ directory of parent shell. That's why if you want to use gogo, you have to do a 
 
    You can simply use your favorite text editor to perform one of these operations. It's
    probably the safest to do it anyway.
+   
+Usage
+---------------
+```
+gogo                 : change directory to default or $HOME if default is not set
+gogo alias           : change directory to 'alias'
+gogo -h, gogo --help : display help message
+gogo -l, gogo --ls   : list aliases
+gogo -e, gogo --edit : edit configuration in $EDITOR
+```
+
+Remember that gogo prints all user-output to `stderr` so you won't be able to see it if
+it's redirected on your system. Sorry, but it's the only way gogo can work.
 
 Configuration
 ---------------
@@ -48,11 +61,3 @@ zażółć = "unicode/is/also/supported/zażółć gęślą jaźń"
 available, even if it's not in a configuration file. In that case it will point to `$HOME` directory.
 
 Please note that you cannot place a comment at the same line as the alias definition.
-
-Other options
----------------
-* list aliases: `gogo -l` or `gogo --ls`
-* edit configuration file in `$EDITOR`: `gogo -e` or `gogo --edit`
-
-Remember that gogo prints all user-output to `stderr` so you won't be able to see it if
-it's redirected on your system. Sorry, but it's the only way gogo can work.
