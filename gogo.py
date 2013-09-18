@@ -24,6 +24,7 @@ import errno
 import gettext
 import locale
 from subprocess import call
+import operator
 
 t = gettext.translation(
     domain='gogo',
@@ -69,11 +70,15 @@ def printDir(directory):
     sys.exit(0)
 
 def printConfig(config):
-    sys.stderr.write(_("Current gogo configuration:\n"))
+    sys.stderr.write(_("Current gogo configuration (sorted alphabetically):\n"))
     if len(config) > 0:
         justification = len(max(config.keys(), key=len)) + 2
 
-        for (key, val) in config.iteritems():
+        # sort
+        configList = [(key, config[key]) for key in config.keys()]
+        configList.sort(key = operator.itemgetter(0))
+
+        for key, val in configList:
             keyStr = "%s" % key.decode(locale.getpreferredencoding())
             valStr = " : %s\n" % val
             sys.stderr.write(keyStr.rjust(justification))
