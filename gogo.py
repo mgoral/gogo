@@ -139,7 +139,7 @@ def parseConfig(lines):
                 key = prepareAlias(split[0])
                 val = preparePath(split[1])
             except IndexError:
-                fatalError(_("Error during parsing a config file..\n  at line %s:\n  %s" % (lineNo, line) ))
+                fatalError(_("Error at parsing a config file..\n  at line %s:\n  %s" % (lineNo, line) ))
             configDict[key] = val
     return configDict
 
