@@ -141,27 +141,28 @@ def parseConfig(lines):
             except IndexError:
                 fatalError(_("Error during parsing a config file..\n  at line %s:\n  %s" % (lineNo, line) ))
             configDict[key] = val
-
     return configDict
 
 def main():
     configName = "gogo.conf"
     configDir = "%s/%s" % (os.path.expanduser("~"), "/.config/gogo")
     lines = readConfig(configDir, configName)
-    config = parseConfig(lines)
 
     argNo = len(sys.argv[1:])
     if 0 == argNo:
+        config = parseConfig(lines)
         printDir(config.get("default", os.path.expanduser("~")))
     elif 1 == argNo:
         arg = sys.argv[1]
         if arg == "-h" or arg == "--help":
             fatalError(HELP_MSG)
         elif arg == "-l" or arg == "--ls":
+            config = parseConfig(lines)
             printConfig(config)
         elif arg == "-e" or arg == "--edit":
             openConfigInEditor(configDir, configName)
         else:
+            config = parseConfig(lines)
             newdir = config.get(arg)
             if newdir is None:
                 fatalError(_("'%s' not found in a configuration file!" % arg))
