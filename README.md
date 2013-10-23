@@ -37,6 +37,7 @@ Usage
 ```
 gogo                 : change directory to default or $HOME if default is not set
 gogo alias           : change directory to 'alias'
+gogo -a alias        : add current directory as alias to the configuration
 gogo -h, gogo --help : display help message
 gogo -l, gogo --ls   : list aliases
 gogo -e, gogo --edit : edit configuration in $EDITOR
