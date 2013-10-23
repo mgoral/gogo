@@ -7,7 +7,7 @@ function gogo
         return
     fi
 
-    dir=$(gogo.py $1)
+    dir=$(gogo.py $@)
     if [[ $? -eq 0 ]]; then
         cd "${dir}"
     fi

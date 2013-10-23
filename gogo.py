@@ -39,9 +39,10 @@ usage:
   gogo [OPTIONS]|[DIR_ALIAS]
 
 options:
-  -l, --ls  : list aliases
-  -e --edit : open configuration file in $EDITOR
-  -h --help : show this message
+  -a alias   : add current directory as alias to the configuration
+  -l, --ls   : list aliases
+  -e, --edit : open configuration file in $EDITOR
+  -h, --help : show this message
 
 See ~/.config/gogo/gogo.conf for configuration details."""
 )
@@ -143,6 +144,13 @@ def parseConfig(lines):
             configDict[key] = val
     return configDict
 
+def addAlias(alias, configDir, configName):
+    currentDir = os.getcwd()
+
+    configPath = os.path.join(configDir, configName)
+    with open(configPath, "a") as file_:
+        file_.write("%s = %s\n" % (alias, currentDir))
+
 def main():
     configName = "gogo.conf"
     configDir = "%s/%s" % (os.path.expanduser("~"), "/.config/gogo")
@@ -161,12 +169,22 @@ def main():
             printConfig(config)
         elif arg == "-e" or arg == "--edit":
             openConfigInEditor(configDir, configName)
+        elif arg == "-a":
+            fatalError(_("Alias to add not specified!"))
         else:
             config = parseConfig(lines)
             newdir = config.get(arg)
             if newdir is None:
                 fatalError(_("'%s' not found in a configuration file!" % arg))
             printDir(newdir)
+    elif 2 == argNo:
+        arg = sys.argv[1]
+        if arg == "-a":
+            alias = sys.argv[2]
+            addAlias(alias, configDir, configName)
+            #sys.exit(1)
+        else:
+            fatalError(HELP_MSG)
     else:
         fatalError(HELP_MSG)
 
