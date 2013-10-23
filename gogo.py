@@ -62,6 +62,10 @@ DEFAULT_CONFIG = [
     "gogo = ~/.config/gogo\n",
 ]
 
+configName = "gogo.conf"
+configDir = "%s/%s" % (os.path.expanduser("~"), "/.config/gogo")
+configPath = os.path.join(configDir, configName)
+
 def fatalError(msg):
     sys.stderr.write(msg + '\n')
     sys.exit(1)
@@ -89,7 +93,7 @@ def printConfig(config):
 
     sys.exit(1)
 
-def createNonExistingConfigDir(configDir):
+def createNonExistingConfigDir():
     try:
         os.makedirs(configDir)
     except OSError as exc:
@@ -97,8 +101,7 @@ def createNonExistingConfigDir(configDir):
             pass
         else: raise
 
-def openConfigInEditor(configDir, configName):
-    configPath = os.path.join(configDir, configName)
+def openConfigInEditor():
     try:
         editor = os.environ["EDITOR"]
     except KeyError:
@@ -107,10 +110,9 @@ def openConfigInEditor(configDir, configName):
     call([editor, configPath])
     sys.exit(1)
 
-def readConfig(configDir, configName):
-    createNonExistingConfigDir(configDir)
+def readConfig():
+    createNonExistingConfigDir()
     lines = None
-    configPath = os.path.join(configDir, configName)
     try:
         with open(configPath, 'r') as file_:
             lines = file_.readlines()
@@ -144,17 +146,17 @@ def parseConfig(lines):
             configDict[key] = val
     return configDict
 
-def addAlias(alias, configDir, configName):
-    currentDir = os.getcwd()
+def addAlias(alias, currentConfig):
+    if currentConfig.get(alias) is None:
+        currentDir = os.getcwd()
 
-    configPath = os.path.join(configDir, configName)
-    with open(configPath, "a") as file_:
-        file_.write("%s = %s\n" % (alias, currentDir))
+        with open(configPath, "a") as file_:
+            file_.write("%s = %s\n" % (alias, currentDir))
+    else:
+        fatalError(_("Alias '%s' already exists!") % alias)
 
 def main():
-    configName = "gogo.conf"
-    configDir = "%s/%s" % (os.path.expanduser("~"), "/.config/gogo")
-    lines = readConfig(configDir, configName)
+    lines = readConfig()
 
     argNo = len(sys.argv[1:])
     if 0 == argNo:
@@ -168,7 +170,7 @@ def main():
             config = parseConfig(lines)
             printConfig(config)
         elif arg == "-e" or arg == "--edit":
-            openConfigInEditor(configDir, configName)
+            openConfigInEditor()
         elif arg == "-a":
             fatalError(_("Alias to add not specified!"))
         else:
@@ -181,7 +183,8 @@ def main():
         arg = sys.argv[1]
         if arg == "-a":
             alias = sys.argv[2]
-            addAlias(alias, configDir, configName)
+            config = parseConfig(lines)
+            addAlias(alias, config)
             #sys.exit(1)
         else:
             fatalError(HELP_MSG)
