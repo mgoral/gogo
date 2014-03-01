@@ -44,6 +44,10 @@ options:
   -e, --edit : open configuration file in $EDITOR
   -h, --help : show this message
 
+examples:
+  gogo alias
+  gogo alias/child/directory
+
 See ~/.config/gogo/gogo.conf for configuration details."""
 )
 
@@ -155,6 +159,26 @@ def addAlias(alias, currentConfig):
     else:
         fatalError(_("Alias '%s' already exists!") % alias)
 
+def parseAlias(alias, config):
+    """Parse alias inputted by a user. Returns a tuple: ('dir', 'remainder_path').
+    It's because of a feature that user can input something like "alias/child/directory" and gogo
+    should change directory into "dir/child/directory"."""
+
+    # If user chooses an alias with a slash in it, so be it.
+    newdir = config.get(alias)
+    if newdir is not None:
+        return (newdir, "")
+
+    splitted = alias.split("/", 1)
+    newdir = config.get(splitted[0])
+    if newdir is None:
+        fatalError(_("'%s' not found in a configuration file!" % alias))
+
+    if len(splitted) == 1:
+        return (newdir, "")
+    else:
+        return (newdir, splitted[1])
+
 def main():
     lines = readConfig()
 
@@ -175,10 +199,11 @@ def main():
             fatalError(_("Alias to add not specified!"))
         else:
             config = parseConfig(lines)
-            newdir = config.get(arg)
-            if newdir is None:
-                fatalError(_("'%s' not found in a configuration file!" % arg))
-            printDir(newdir)
+            newdir, remainder = parseAlias(arg, config)
+            if len(remainder) > 0: # fix for e.g. 'gogo -' which would result in '-/'
+                printDir(os.path.join(newdir, remainder))
+            else:
+                printDir(newdir)
     elif 2 == argNo:
         arg = sys.argv[1]
         if arg == "-a":

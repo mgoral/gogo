@@ -37,11 +37,15 @@ Usage
 ```
 gogo                 : change directory to default or $HOME if default is not set
 gogo alias           : change directory to 'alias'
+gogo alias/child/dir : change directory to the child directory of your alias (i.e. 'alias'/child/dir)
 gogo -a alias        : add current directory as alias to the configuration
 gogo -h, gogo --help : display help message
 gogo -l, gogo --ls   : list aliases
 gogo -e, gogo --edit : edit configuration in $EDITOR
 ```
+
+Note however that changing a directory to the child of alias will not work if your alias already
+have slash in it. Sorry!
 
 Remember that gogo prints all user-output to `stderr` so you won't be able to see it if
 it's redirected on your system. Sorry, but it's the only way gogo can work.
