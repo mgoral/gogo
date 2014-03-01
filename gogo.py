@@ -26,6 +26,8 @@ import locale
 from subprocess import call
 import operator
 
+__version__ = "1.2.0"
+
 t = gettext.translation(
     domain='gogo',
     fallback=True)
@@ -39,10 +41,11 @@ usage:
   gogo [OPTIONS]|[DIR_ALIAS]
 
 options:
-  -a alias   : add current directory as alias to the configuration
-  -l, --ls   : list aliases
-  -e, --edit : open configuration file in $EDITOR
-  -h, --help : show this message
+  -a alias      : add current directory as alias to the configuration
+  -l, --ls      : list aliases
+  -e, --edit    : open configuration file in $EDITOR
+  -h, --help    : show this message
+  -v, --version : print version number and exit
 
 examples:
   gogo alias
@@ -69,6 +72,10 @@ DEFAULT_CONFIG = [
 configName = "gogo.conf"
 configDir = "%s/%s" % (os.path.expanduser("~"), "/.config/gogo")
 configPath = os.path.join(configDir, configName)
+
+def printVersion():
+    sys.stderr.write(_("gogo %s\n") % __version__)
+    sys.exit(1)
 
 def fatalError(msg):
     sys.stderr.write(msg + '\n')
@@ -190,6 +197,8 @@ def main():
         arg = sys.argv[1]
         if arg == "-h" or arg == "--help":
             fatalError(HELP_MSG)
+        elif arg == "-v" or arg == "--version":
+            printVersion()
         elif arg == "-l" or arg == "--ls":
             config = parseConfig(lines)
             printConfig(config)
