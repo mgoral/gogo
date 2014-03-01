@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Copyright (C) 2013 Michal Goral
+Copyright (C) 2013-2014 Michal Goral
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -219,7 +219,6 @@ def main():
             alias = sys.argv[2]
             config = parseConfig(lines)
             addAlias(alias, config)
-            #sys.exit(1)
         else:
             fatalError(HELP_MSG)
     else:
