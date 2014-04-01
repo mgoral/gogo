@@ -1,9 +1,10 @@
 GOGO
 ======
 
-gogo is a great way to bookmark directories inside your shell. You don't have to remember long and 
-complicated paths anymore. Just type `gogo xmas` from anywhere and you're in 
-`~/Pictures/from_mum/1994/12/christmas`.
+gogo is a great way to bookmark directories inside your shell. You don't have to remember long and
+complicated paths anymore. Just type `gogo xmas` from anywhere and you're in
+`~/Pictures/from_mum/1994/12/christmas`. You can even use it to connect to ssh servers the very same
+way!
 
 Installation
 --------------
@@ -31,7 +32,7 @@ directory of parent shell. That's why if you want to use gogo, you have to do a 
 
    You can simply use your favorite text editor to perform one of these operations. It's
    probably the safest to do it anyway.
-   
+
 Usage
 ---------------
 ```
@@ -66,3 +67,20 @@ zażółć = "unicode/is/also/supported/zażółć gęślą jaźń"
 available, even if it's not in a configuration file. In that case it will point to `$HOME` directory.
 
 Please note that you cannot place a comment at the same line as the alias definition.
+
+gogo allows you to create aliases for connecting directly into directories on ssh servers:
+```
+sshalias = ssh://server_info:shell /desired/path
+sshalias2 = ssh://another_server ~/second/path
+```
+
+`server_info` is provided in a typical ssh format, so it can be e.g. username@server or a host alias
+stored in your `~/.ssh/config` file. After that comes an optional shell argument (separated by a
+colon) into which you will be logged in. (Note however that if shell is not explicitly specified,
+value of your ${SHELL} environment variable will be used.) Then, after a space, comes an actual
+path.
+
+If you ever wonder what commands gogo executes, you can alway call it directly:
+```
+~/bin/gogo.py
+```

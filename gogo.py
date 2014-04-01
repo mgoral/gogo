@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import sys
 import os
 import errno
+import getpass
 import gettext
 import locale
 import operator
@@ -59,11 +60,19 @@ DEFAULT_CONFIG = [
     _("# Each entry should be in the following format:") + '\n',
     _("# dir_alias = /dir/path/") + '\n',
     _("# Example:") + '\n',
+    "\n",
     "default = %s\n" % os.path.expanduser("~"),
     "\n",
     _("# 'default' is a special alias which is used when no alias is given to gogo.") + '\n',
     _("# If you don't specify it in a configuration file, it'll point to your home dir.") + '\n',
-    _("# Have fun!") + '\n\n',
+    "\n",
+    _("# You can also connect to directory on ssh server but syntax is slightly different:") + '\n',
+    _("# dir_alias = ssh://server_name:chosen_shell /dir/path/") + '\n\n',
+    _("# You can omit shell if you wish but in this case gogo will use ${SHELL} variable.") + '\n',
+    _("# dir_alias = ssh://second_server /dir/path/") + '\n',
+    "\n",
+    "sshloc = ssh://%s@127.0.0.1:%s %s\n" %
+        (getpass.getuser(), os.environ["SHELL"], os.path.expanduser("~")),
     "- = -\n"
     "gogo = ~/.config/gogo\n",
 ]
@@ -95,10 +104,25 @@ def fatalError(msg):
     echo(msg, sys.stderr)
     sys.exit(1)
 
-def changeDir(directory):
+def _changeDirectory(directory):
     if directory.startswith("~/"):
         directory = directory.replace("~", os.path.expanduser("~"))
     call("cd '%s'" % directory)
+
+def _sshToAddress(address):
+    addressPart, directory = address.split(" ", 1)
+    splitted = addressPart.split(":")
+    server = splitted[0]
+    shell = splitted[1] if len(splitted) > 1 else "${SHELL}"
+
+    call("ssh %s -t 'cd %s; %s'" % (server, directory, shell))
+
+def processRequest(request):
+    if request.startswith("ssh://"):
+        address = request.replace("ssh://", "", 1)
+        _sshToAddress(address)
+    else:
+        _changeDirectory(request)
 
 def printConfig(config):
     echo(_("Current gogo configuration (sorted alphabetically):"))
@@ -203,7 +227,7 @@ def main():
     argNo = len(sys.argv[1:])
     if 0 == argNo:
         config = parseConfig(lines)
-        changeDir(config.get("default", os.path.expanduser("~")))
+        processRequest(config.get("default", os.path.expanduser("~")))
     elif 1 == argNo:
         arg = sys.argv[1]
         if arg == "-h" or arg == "--help":
@@ -221,9 +245,9 @@ def main():
             config = parseConfig(lines)
             newdir, remainder = parseAlias(arg, config)
             if len(remainder) > 0: # fix for e.g. 'gogo -' which would result in '-/'
-                changeDir(os.path.join(newdir, remainder))
+                processRequest(os.path.join(newdir, remainder))
             else:
-                changeDir(newdir)
+                processRequest(newdir)
     elif 2 == argNo:
         arg = sys.argv[1]
         if arg == "-a":
