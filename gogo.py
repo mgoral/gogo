@@ -23,10 +23,9 @@ import os
 import errno
 import gettext
 import locale
-from subprocess import call
 import operator
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 t = gettext.translation(
     domain='gogo',
@@ -73,20 +72,34 @@ configName = "gogo.conf"
 configDir = "%s/%s" % (os.path.expanduser("~"), "/.config/gogo")
 configPath = os.path.join(configDir, configName)
 
-def printVersion():
-    sys.stderr.write(_("gogo %s\n") % __version__)
-    sys.exit(1)
+def echo(text, output=sys.stdout, endline=True):
+    if output == sys.stdout:
+        if endline is True:
+            output.write("echo '%s';" %  text)
+        else:
+            output.write("echo -n '%s';" %  text)
+    else:
+        output.write("%s" % text)
+        if endline is True:
+            output.write("\n")
 
-def fatalError(msg):
-    sys.stderr.write(msg + '\n')
-    sys.exit(1)
-
-def printDir(directory):
-    sys.stdout.write(directory + '\n')
+def call(cmd):
+    sys.stdout.write("%s;\n" % cmd)
     sys.exit(0)
 
+def printVersion():
+    echo("gogo %s" % __version__)
+    sys.exit(0)
+
+def fatalError(msg):
+    echo(msg, sys.stderr)
+    sys.exit(1)
+
+def changeDir(directory):
+    call("cd %s" % directory)
+
 def printConfig(config):
-    sys.stderr.write(_("Current gogo configuration (sorted alphabetically):\n"))
+    echo(_("Current gogo configuration (sorted alphabetically):"))
     if len(config) > 0:
         justification = len(max(config.keys(), key=len)) + 2
 
@@ -96,13 +109,11 @@ def printConfig(config):
 
         for key, val in configList:
             keyStr = "%s" % key.decode(locale.getpreferredencoding())
-            valStr = " : %s\n" % val
-            sys.stderr.write(keyStr.rjust(justification))
-            sys.stderr.write(valStr)
+            valStr = " : %s" % val
+            echo(keyStr.rjust(justification), endline=False)
+            echo(valStr)
     else:
-        sys.stderr.write(_("  [ NO CONFIGURATION ] \n"))
-
-    sys.exit(1)
+        echo(_("  [ NO CONFIGURATION ] "), sys.stderr)
 
 def createNonExistingConfigDir():
     try:
@@ -116,9 +127,9 @@ def openConfigInEditor():
     try:
         editor = os.environ["EDITOR"]
     except KeyError:
-        sys.stderr.write(_("No $EDITOR set. Trying vi.\n"))
+        echo(_("No $EDITOR set. Trying vi."), sys.stderr)
         editor = "vi"
-    call([editor, configPath])
+    call("%s %s" % (editor, configPath))
     sys.exit(1)
 
 def readConfig():
@@ -192,7 +203,7 @@ def main():
     argNo = len(sys.argv[1:])
     if 0 == argNo:
         config = parseConfig(lines)
-        printDir(config.get("default", os.path.expanduser("~")))
+        changeDir(config.get("default", os.path.expanduser("~")))
     elif 1 == argNo:
         arg = sys.argv[1]
         if arg == "-h" or arg == "--help":
@@ -210,9 +221,9 @@ def main():
             config = parseConfig(lines)
             newdir, remainder = parseAlias(arg, config)
             if len(remainder) > 0: # fix for e.g. 'gogo -' which would result in '-/'
-                printDir(os.path.join(newdir, remainder))
+                changeDir(os.path.join(newdir, remainder))
             else:
-                printDir(newdir)
+                changeDir(newdir)
     elif 2 == argNo:
         arg = sys.argv[1]
         if arg == "-a":
@@ -227,4 +238,4 @@ def main():
 try:
     main()
 except KeyboardInterrupt:
-    raise SystemExit(0)
+    sys.exit(2)
