@@ -96,7 +96,9 @@ def fatalError(msg):
     sys.exit(1)
 
 def changeDir(directory):
-    call("cd %s" % directory)
+    if directory.startswith("~/"):
+        directory = directory.replace("~", os.path.expanduser("~"))
+    call("cd '%s'" % directory)
 
 def printConfig(config):
     echo(_("Current gogo configuration (sorted alphabetically):"))
@@ -145,9 +147,7 @@ def readConfig():
     return lines
 
 def preparePath(path):
-    path = path.strip('" ')
-    if path.startswith("~/"):
-        path = path.replace("~", os.path.expanduser("~"))
+    path = path.strip('"\' ')
     return path
 
 def prepareAlias(alias):
