@@ -3,13 +3,14 @@
 
 _gogoAliases()
 {
-    CONF_FILE="${HOME}/.config/gogo/gogo.conf"
-
     cur=$1
+    CONF_FILE="${HOME}/.config/gogo/gogo.conf"
 
     # read aliases from $CONF_FILE
     if [[ -f ${CONF_FILE} ]]; then
         IFS=' ='
+        CONFALIASES=
+
         while read -r confalias directory
         do
             # Recognise comments
@@ -66,8 +67,6 @@ _gogoAliases()
 _gogo()
 {
     local cur prev opts
-
-    export CONFALIASES=
 
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
