@@ -1,0 +1,92 @@
+# gogo completion file
+# source it to use it.
+
+_gogoAliases()
+{
+    CONF_FILE="${HOME}/.config/gogo/gogo.conf"
+
+    cur=$1
+
+    # read aliases from $CONF_FILE
+    if [[ -f ${CONF_FILE} ]]; then
+        IFS=' ='
+        while read -r confalias directory
+        do
+            # Recognise comments
+            if [[ ${confalias} =~ '^#' ]]; then
+                continue
+            fi
+
+            # When <tab> is pressed when full alias is typed in, completion will add "/" to it. This
+            # way path completion will be enabled.
+            if [[ ${cur} != "" && (${cur} == ${confalias}) ]]; then
+                COMPREPLY=( $(compgen -W "${confalias}/" -- ${cur}) )
+                return
+            fi
+
+            # Path completion
+            # Basically changes alias to real directory name, fetches all directories inside it and
+            # changes real directory name back to alias.
+            if [[ ${cur} == ${confalias}/* ]]; then
+                unset IFS
+                if [[ ${directory} != *://* ]]; then
+                    # Use this instead of $directory which may contain a tilde interpreted as string
+                    # literal (eval enforces '~' expansion)
+                    eval realdirectory=${directory}
+
+                    # Replace the first occurence of alias in cur with a real directory
+                    currealdir=${cur/${confalias}/${realdirectory}}
+
+                    # List directories matching an expression
+                    compdirs="$(echo ${currealdir}*/)"
+
+                    # compdirs contain this silly string (like /home/user/*/) when there's no
+                    # directory inside
+                    if [[ ${compdirs} != "${currealdir}*/" ]]; then
+                        aliasdirs=${compdirs//${realdirectory}/${confalias}}
+                        COMPREPLY=( $(compgen -W "${aliasdirs}" -- ${cur}) )
+                    fi
+                fi               
+                return
+            fi
+
+            # don't display the default target
+            if [[ ${confalias} == "default" ]]; then
+                continue
+            fi
+
+            CONFALIASES="${CONFALIASES} ${confalias}"
+        done < ${CONF_FILE}
+        unset IFS
+
+        COMPREPLY=( $(compgen -W "${CONFALIASES}" -- ${cur}) )
+    fi
+}
+
+_gogo()
+{
+    local cur prev opts
+
+    export CONFALIASES=
+
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    if [[ ${COMP_CWORD} -ge 2 ]]; then
+        return 0
+    fi
+
+    opts="-a -l --ls -e --edit -h --help -v --version"
+
+    case "${cur}" in
+        -*)
+            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+            ;;
+        *)
+            _gogoAliases ${cur}
+            ;;
+    esac
+}
+
+complete -o nospace -F _gogo gogo
