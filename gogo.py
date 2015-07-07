@@ -231,7 +231,7 @@ def main():
     elif 1 == argNo:
         arg = sys.argv[1]
         if arg == "-h" or arg == "--help":
-            fatalError(HELP_MSG)
+            echo(HELP_MSG)
         elif arg == "-v" or arg == "--version":
             printVersion()
         elif arg == "-l" or arg == "--ls":
