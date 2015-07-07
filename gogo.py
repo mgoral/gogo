@@ -100,9 +100,9 @@ def printVersion():
     echo("gogo %s" % __version__)
     sys.exit(0)
 
-def fatalError(msg):
+def fatalError(msg, status=1):
     echo(msg, sys.stderr)
-    sys.exit(1)
+    sys.exit(status)
 
 def _changeDirectory(directory):
     if directory.startswith("~/"):
@@ -255,9 +255,9 @@ def main():
             config = parseConfig(lines)
             addAlias(alias, config)
         else:
-            fatalError(HELP_MSG)
+            fatalError(HELP_MSG, 2)
     else:
-        fatalError(HELP_MSG)
+        fatalError(HELP_MSG, 3)
 
 try:
     main()

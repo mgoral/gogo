@@ -2,5 +2,8 @@
 # Gogo from anywhere.
 function gogo
 {
-    eval "`gogo.py $@`"
+    CMD=`gogo.py $@`
+    RET=$?
+    eval "$CMD"
+    return $RET
 }
