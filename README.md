@@ -53,7 +53,7 @@ it's redirected on your system. Sorry, but it's the only way gogo can work.
 
 Configuration
 ---------------
-gogo stores configuration file in `~/.config/gogo.conf`. It's auto created if it doesn't exist.
+gogo stores configuration file in `~/.config/gogo/gogo.conf`. It's auto created if it doesn't exist.
 The syntax is pretty simple:
 ```
 # Comments are lines that start from '#' character.
