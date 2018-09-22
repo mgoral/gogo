@@ -25,6 +25,7 @@ import getpass
 import gettext
 import locale
 import operator
+import re
 
 __version__ = "1.3.0"
 
@@ -107,7 +108,7 @@ def fatalError(msg, status=1):
 def _changeDirectory(directory):
     if directory.startswith("~/"):
         directory = directory.replace("~", os.path.expanduser("~"))
-    call("cd '%s'" % directory)
+    call("cd \"%s\"" % directory)
 
 def _sshToAddress(address):
     addressPart, directory = address.split(" ", 1)
@@ -213,6 +214,7 @@ def parseAlias(alias, config):
 
     splitted = alias.split("/", 1)
     newdir = config.get(splitted[0])
+
     if newdir is None:
         fatalError(_("'%s' not found in a configuration file!" % alias))
 
@@ -225,6 +227,14 @@ def main():
     lines = readConfig()
 
     argNo = len(sys.argv[1:])
+    for index, value in enumerate(sys.argv[1:]):
+        sys.argv[index + 1] = value.strip("\"'")
+
+    if argNo > 1:
+        if sys.argv[1].index("/") != -1:
+            sys.argv[1] = ' '.join(sys.argv[1:])
+            argNo = 1
+
     if 0 == argNo:
         config = parseConfig(lines)
         processRequest(config.get("default", os.path.expanduser("~")))
@@ -244,10 +254,19 @@ def main():
         else:
             config = parseConfig(lines)
             newdir, remainder = parseAlias(arg, config)
+
+            spacesIter = re.finditer(r"[\s]{1}", newdir)
+            for item in spacesIter:
+                newdir = re.sub(r"[\s]{1}", '\\ ', newdir)
+
             if len(remainder) > 0: # fix for e.g. 'gogo -' which would result in '-/'
-                processRequest(os.path.join(newdir, remainder))
+                spacesIter = re.finditer(r"[\s]{1}", remainder)
+                for item in spacesIter:
+                    remainder = re.sub(r"[\s]{1}", '\\ ', remainder)
+
+                processRequest("\"" + os.path.join(newdir, remainder) + "\"")
             else:
-                processRequest(newdir)
+                processRequest("\"" + newdir + "\"")
     elif 2 == argNo:
         arg = sys.argv[1]
         if arg == "-a":
