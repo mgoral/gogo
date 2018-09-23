@@ -25,7 +25,6 @@ import getpass
 import gettext
 import locale
 import operator
-import re
 
 __version__ = "1.3.0"
 
@@ -255,15 +254,10 @@ def main():
             config = parseConfig(lines)
             newdir, remainder = parseAlias(arg, config)
 
-            spacesIter = re.finditer(r"[\s]{1}", newdir)
-            for item in spacesIter:
-                newdir = re.sub(r"[\s]{1}", '\\ ', newdir)
+            newdir = newdir.replace(' ', '\\ ')
 
             if len(remainder) > 0: # fix for e.g. 'gogo -' which would result in '-/'
-                spacesIter = re.finditer(r"[\s]{1}", remainder)
-                for item in spacesIter:
-                    remainder = re.sub(r"[\s]{1}", '\\ ', remainder)
-
+                remainder = remainder.replace(' ', '\\ ')
                 processRequest("\"" + os.path.join(newdir, remainder) + "\"")
             else:
                 processRequest("\"" + newdir + "\"")
