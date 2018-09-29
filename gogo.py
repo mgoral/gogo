@@ -230,7 +230,7 @@ def main():
         sys.argv[index + 1] = value.strip("\"'")
 
     if argNo > 1:
-        if sys.argv[1].index("/") != -1:
+        if sys.argv[1].find("/") != -1:
             sys.argv[1] = ' '.join(sys.argv[1:])
             argNo = 1
 
