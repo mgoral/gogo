@@ -25,6 +25,7 @@ import getpass
 import gettext
 import locale
 import operator
+import six
 
 __version__ = "1.3.0"
 
@@ -32,7 +33,10 @@ t = gettext.translation(
     domain='gogo',
     fallback=True)
 gettext.install('gogo')
-_ = t.ugettext
+if six.PY2:
+    _ = t.ugettext
+else:
+    _ = t.gettext
 
 HELP_MSG = _(
 """gogo - bookmark your favorite directories
