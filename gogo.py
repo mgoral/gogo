@@ -32,7 +32,7 @@ t = gettext.translation(
     domain='gogo',
     fallback=True)
 gettext.install('gogo')
-_ = t.ugettext
+_ = t.gettext
 
 HELP_MSG = _(
 """gogo - bookmark your favorite directories
