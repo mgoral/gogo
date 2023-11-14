@@ -134,7 +134,7 @@ def printConfig(config):
         configList.sort(key = operator.itemgetter(0))
 
         for key, val in configList:
-            keyStr = "%s" % key.decode(locale.getpreferredencoding())
+            keyStr = "%s" % key
             valStr = " : %s" % val
             echo(keyStr.rjust(justification), endline=False)
             echo(valStr)
